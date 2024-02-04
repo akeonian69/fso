@@ -26,8 +26,17 @@ const App = () => {
     return setVotes(newVotes)
   }
 
+  const mostVoteAnecdote = votes.reduce((m, n, i) => {
+    if (votes[m] < n) {
+      return i
+    } else {
+      return m
+    }
+  }, 0)
+
   return (
     <>
+      <h1>Anecdote of the day</h1>
       <div>
         {anecdotes[selected]}
       </div>
@@ -38,6 +47,9 @@ const App = () => {
       <button onClick={handleRandomize}>
         next anecdote
       </button>
+      <h1>Anecdote with most votes</h1>
+      <div>{anecdotes[mostVoteAnecdote]}</div> 
+      <div>has {votes[mostVoteAnecdote]} votes</div> 
     </>
   )
 }
