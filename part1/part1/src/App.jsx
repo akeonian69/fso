@@ -1,42 +1,51 @@
-const Footer = () => {
+import { useState } from 'react'
+
+const History = (props) => {
+  if (props.allClicks.length === 0) {
+    return (
+      <div>
+        the app is used by pressing the buttons
+      </div>
+    )
+  }
   return (
     <div>
-      greetings app created by <a href='https://github.com/mluukkai'>mluukkai</a>
+      button press history: {props.allClicks.join(' ')}
     </div>
   )
 }
 
-const Hello = (props) => {
-  console.log(props)
-  return (
-    <div>
-      <p>Hello {props.name}, you are {props.age} years old</p>
-    </div>
-  )
-}
+const Button = ({ handleClick, text }) => (
+  <button onClick={handleClick}>
+    {text}
+  </button>
+)
 
 const App = () => {
-  const name = 'Peter'
-  const age = 10
-  const friends = [
-    { name: 'Peter', age: 4 },
-    { name: 'Maya', age: 10 }
-  ]
-  const array = ['Peter', 'Maya']
+  const [ left, setLeft ] = useState(0)
+  const [ right, setRight ] = useState(0)
+  const [ allClicks, setAll ] = useState([])
+  
+  const handleLeftClick = () => {
+    setAll(allClicks.concat('L'))
+    const updatedLeft = left + 1
+    setLeft(updatedLeft)
+  }
+
+  const handleRightClick = () => {
+    setAll(allClicks.concat('R'))
+    const updatedRight = right + 1
+    setRight(updatedRight)
+  }
+
   return (
-    <>
-      <h1>Greetings</h1>
-      <Hello name='George' age={26 + 10}/>
-      <Hello name={name} age={age}/>
-      <Footer />
-      <div>
-        <p>{friends[0].name} {friends[0].age}</p>
-        <p>{friends[1].name} {friends[1].age}</p>
-      </div>
-      <div>
-        <p>{array}</p>
-      </div>
-    </>
+    <div>
+      {left}
+      <Button handleClick={handleLeftClick} text='left' />
+      <Button handleClick={handleRightClick} text='right' />
+      {right}
+      <History allClicks={allClicks} />
+    </div>
   )
 }
 
