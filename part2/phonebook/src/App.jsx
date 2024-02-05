@@ -51,7 +51,7 @@ const App = () => {
 
   const addPerson = (event) => {
     event.preventDefault()
-    const found = persons.find(person => person.name == newName)
+    const found = persons.find(person => person.name === newName)
     if (found === undefined) {
       const newPerson = {
         id: persons.length + 1,
