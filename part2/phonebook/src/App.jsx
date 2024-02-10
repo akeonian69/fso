@@ -150,7 +150,7 @@ const App = () => {
       personsService
         .remove(person.id)
         .then(data => {
-          const newPersons = persons.filter(person => data.id !== person.id)
+          const newPersons = persons.filter(p => p.id !== person.id)
           setPersons(newPersons)
           showMessage(`Deleted ${person.name}`)
         })
