@@ -1,4 +1,4 @@
-POST http://localhost:3001/api/persons
+POST https://b6d18647-80db-4024-93ed-bde764a26b33-00-37wq9h5nmy4ai.worf.replit.dev/api/persons
 Content-Type: application/json
 
 {
@@ -7,7 +7,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:3001/api/persons
+POST https://b6d18647-80db-4024-93ed-bde764a26b33-00-37wq9h5nmy4ai.worf.replit.dev/api/persons
 Content-Type: application/json
 
 {
@@ -15,7 +15,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:3001/api/persons
+POST https://b6d18647-80db-4024-93ed-bde764a26b33-00-37wq9h5nmy4ai.worf.replit.dev/api/persons
 Content-Type: application/json
 
 {
