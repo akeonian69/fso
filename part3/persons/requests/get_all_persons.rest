@@ -1,2 +1,0 @@
-
-GET https://b6d18647-80db-4024-93ed-bde764a26b33-00-37wq9h5nmy4ai.worf.replit.dev/api/persons
