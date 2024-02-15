@@ -88,7 +88,6 @@ describe('favorite blog', () => {
     })
     test('When list has many elements, then favorite is the one with max likes', () => {
         const result = listHelper.favoriteBlog(blogs)
-        console.log('result', result)
         const expected = {
             _id: "5a422b3a1b54a676234d17f9",
             title: "Canonical string reduction",
@@ -116,7 +115,6 @@ describe('Author with most blogs', () => {
     })
     test('When list has many elements, the author with most blogs', () => {
         const result = listHelper.mostBlogs(blogs)
-        console.log('result', result)
         const expected = {
             author: "Robert C. Martin",
             blogs: 3
@@ -141,7 +139,6 @@ describe('Author with most likes', () => {
     })
     test('When list has many elements, the author with most likes', () => {
         const result = listHelper.mostLikes(blogs)
-        console.log('result', result)
         const expected = {
             author: "Edsger W. Dijkstra",
             likes: 17
