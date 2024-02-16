@@ -1,9 +1,35 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const logger = require('../utils/logger')
+const jwt = require('jsonwebtoken')
+
+const getDecodedToken = (request, response) => {
+  try {
+    const decodedToken = jwt.verify(
+      request.token, 
+      process.env.SECRET,
+      { expiresIn: 60*60 }
+    )
+    if (!decodedToken.id) {
+      response.status(401).json({ error: 'token invalid' })
+      return null
+    }
+    return decodedToken
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      response.status(400).json({ error: 'token missing or invalid' })
+      return null
+    } else if (error.name === 'TokenExpiredError') {
+      return response.status(401).json({
+        error: 'token expired'
+      })
+    }
+    throw error
+  }
+}
 
 blogsRouter.get('/', async (request, response) => {
-  const blogs = await Blog.find({})
+  const blogs = await Blog.find({}).populate('user')
   logger.info(`db blogs: ${blogs}`)
   response.json(blogs)
   // logger.error(error)
@@ -11,7 +37,16 @@ blogsRouter.get('/', async (request, response) => {
 
 blogsRouter.post('/', async (request, response) => {
   logger.info(`post request body:`, request.body)
+  const user = request.user
+  if (!user) {
+    const error = {
+      error: "Invalid Token"
+    }
+    return response.status(401).json(error)
+  }
+
   const item = {
+    user: user.id,
     likes: request.body.likes || 0,
     ...request.body
   }
@@ -21,17 +56,37 @@ blogsRouter.post('/', async (request, response) => {
   const blog = new Blog(item)
   try {
     const result = await blog.save()
+    user.blogs = user.blogs.concat(result._id)
+    await user.save()
     response.status(201).json(result)
-  } catch(exception) {
+  } catch(error) {
     logger.error(error)
   }
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
   logger.info(`delete request body:`, request.body)
+
+  const user = request.user
+  if (!user) {
+    const error = {
+      error: "Invalid Token"
+    }
+    return response.status(401).json(error)
+  }
+
   const id = request.params.id
   logger.info('params id', id)
+  const blog = await Blog.findById(id)
+  if (blog.user.toString() !== user._id.toString()) {
+    const error = {
+      error: "Unauthorized user"
+    }
+    return response.status(401).json(error)
+  }
+  user.blogs = user.blogs.filter(b => b.toString() !== id)
   await Blog.findByIdAndDelete(id)
+  user.save()
   response.status(204).end() 
 })
 
