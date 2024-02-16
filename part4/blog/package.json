@@ -11,11 +11,13 @@
   "author": "Amit Kumar",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.3",
     "express": "^4.18.2",
-    "mongoose": "^8.1.2"
+    "mongoose": "^8.1.2",
+    "mongoose-unique-validator": "^5.0.0"
   },
   "devDependencies": {
     "jest": "^29.7.0",
