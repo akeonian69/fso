@@ -3,7 +3,7 @@ const Blog = require('../models/blog')
 const logger = require('../utils/logger')
 const jwt = require('jsonwebtoken')
 
-const getDecodedToken = (request, response) => {
+const getDecodedToken = (request, response, next) => {
   try {
     const decodedToken = jwt.verify(
       request.token, 
@@ -16,26 +16,21 @@ const getDecodedToken = (request, response) => {
     }
     return decodedToken
   } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      response.status(400).json({ error: 'token missing or invalid' })
-      return null
-    } else if (error.name === 'TokenExpiredError') {
-      return response.status(401).json({
-        error: 'token expired'
-      })
-    }
-    throw error
+    next(error)
   }
 }
 
-blogsRouter.get('/', async (request, response) => {
-  const blogs = await Blog.find({}).populate('user')
-  logger.info(`db blogs: ${blogs}`)
-  response.json(blogs)
-  // logger.error(error)
+blogsRouter.get('/', async (request, response, next) => {
+  try {
+    const blogs = await Blog.find({}).populate('user')
+    logger.info(`db blogs: ${blogs}`)
+    response.json(blogs)
+  } catch(exception) {
+    next(exception)
+  }
 })
 
-blogsRouter.post('/', async (request, response) => {
+blogsRouter.post('/', async (request, response, next) => {
   logger.info(`post request body:`, request.body)
   const user = request.user
   if (!user) {
@@ -60,11 +55,11 @@ blogsRouter.post('/', async (request, response) => {
     await user.save()
     response.status(201).json(result)
   } catch(error) {
-    logger.error(error)
+    next(error)
   }
 })
 
-blogsRouter.delete('/:id', async (request, response) => {
+blogsRouter.delete('/:id', async (request, response, next) => {
   logger.info(`delete request body:`, request.body)
 
   const user = request.user
@@ -84,10 +79,14 @@ blogsRouter.delete('/:id', async (request, response) => {
     }
     return response.status(401).json(error)
   }
-  user.blogs = user.blogs.filter(b => b.toString() !== id)
-  await Blog.findByIdAndDelete(id)
-  user.save()
-  response.status(204).end() 
+  try {
+    user.blogs = user.blogs.filter(b => b.toString() !== id)
+    await Blog.findByIdAndDelete(id)
+    user.save()
+    response.status(204).end() 
+  } catch (exception) {
+    next(exception)
+  }
 })
 
 blogsRouter.put('/:id', async (request, response) => {
@@ -95,8 +94,12 @@ blogsRouter.put('/:id', async (request, response) => {
   const id = request.params.id
   logger.info('params id', id)
   const opts = { new: true }
-  const result = await Blog.findByIdAndUpdate(id, request.body, opts)
-  response.json(result)
+  try {
+    const result = await Blog.findByIdAndUpdate(id, request.body, opts)
+    response.json(result)
+  } catch(exception) {
+    next(exception)
+  }
 })
 
 module.exports = blogsRouter
