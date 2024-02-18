@@ -22,7 +22,7 @@ const getDecodedToken = (request, response, next) => {
 
 blogsRouter.get('/', async (request, response, next) => {
   const blogs = await Blog.find({}).populate('user')
-  logger.info(`db blogs: ${blogs}`)
+  logger.info(`db blogs: ${blogs.length}`)
   response.json(blogs)
 })
 
@@ -48,6 +48,7 @@ blogsRouter.post('/', async (request, response, next) => {
   const result = await blog.save()
   user.blogs = user.blogs.concat(result._id)
   await user.save()
+  result.user = user
   response.status(201).json(result)
 })
 
@@ -80,8 +81,25 @@ blogsRouter.delete('/:id', async (request, response, next) => {
 
 blogsRouter.put('/:id', async (request, response) => {
   logger.info(`delete request body:`, request.body)
+
+  const user = request.user
+  if (!user) {
+    const error = {
+      error: "Invalid Token"
+    }
+    return response.status(401).json(error)
+  }
+
   const id = request.params.id
   logger.info('params id', id)
+  const blog = await Blog.findById(id)
+  if (blog.user.toString() !== user._id.toString()) {
+    const error = {
+      error: "Unauthorized user"
+    }
+    return response.status(401).json(error)
+  }
+
   const opts = { new: true }
   const result = await Blog.findByIdAndUpdate(id, request.body, opts)
   response.json(result)
