@@ -8,10 +8,10 @@ import loginService from './services/login'
 const Notification = props => {
   const { message } = props
   const notificationStyle = {
-    color: "green",
-    background: "lightgrey",
+    color: 'green',
+    background: 'lightgrey',
     fontSize: 20,
-    borderStyle: "solid",
+    borderStyle: 'solid',
     borderRadius: 5,
     padding: 10,
     marginBottom: 10
@@ -27,10 +27,10 @@ const Notification = props => {
 const ErrorNotification = props => {
   const { error } = props
   const notificationStyle = {
-    color: "red",
-    background: "lightgrey",
+    color: 'red',
+    background: 'lightgrey',
     fontSize: 20,
-    borderStyle: "solid",
+    borderStyle: 'solid',
     borderRadius: 5,
     padding: 10,
     marginBottom: 10
@@ -49,19 +49,19 @@ const LoginForm = props => {
     <form onSubmit={onSubmit}>
       <div>
         username
-          <input 
-            type="text"
-            value={username}
-            name="Username"
-            onChange={onUsernameChange} />
+        <input
+          type="text"
+          value={username}
+          name="Username"
+          onChange={onUsernameChange} />
       </div>
       <div>
         password
-          <input 
-            type="password"
-            value={password}
-            name="Password"
-            onChange={onPasswordChange} />
+        <input
+          type="password"
+          value={password}
+          name="Password"
+          onChange={onPasswordChange} />
       </div>
       <button type="submit">login</button>
     </form>
@@ -85,7 +85,7 @@ const App = () => {
     }
     fetchData()
   }, [])
-  
+
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBloglistAppUser')
     if (loggedUserJSON) {
@@ -109,13 +109,13 @@ const App = () => {
     console.log('logging in with', username, password)
     try {
       const credentials = { username, password }
-      const loggedUser = await loginService.login(credentials)    
+      const loggedUser = await loginService.login(credentials)
       console.log('user', loggedUser)
 
       window.localStorage.setItem(
         'loggedBloglistAppUser', JSON.stringify(loggedUser)
       )
-      
+
       blogService.setToken(loggedUser.token)
       setUser(loggedUser)
       setUsername('')
@@ -157,7 +157,7 @@ const App = () => {
     const newBlogs = blogs.map(b => {
       if (b.id === blog.id) {
         return updatedBlog
-      } 
+      }
       return b
     })
     setBlogs(newBlogs)
@@ -195,14 +195,14 @@ const App = () => {
       <h2>log in to application</h2>
       <Notification message={message} />
       <ErrorNotification error={errorMessage} />
-      <LoginForm 
+      <LoginForm
         username={username}
         onUsernameChange={handleUsernameChange}
         password={password}
         onPasswordChange={handlePasswordChange}
         onSubmit={handleLogin} />
 
-      </div> 
+    </div>
   }
 
   const sortedBlogs = blogs.sort((b1, b2) => b2.likes - b1.likes)
@@ -215,13 +215,13 @@ const App = () => {
       {user && <div>
         <p>{user.name} logged in
           <button onClick={handleLogout}>logout</button>
-        </p>  
+        </p>
       </div>}
       <Toggelable buttonLabel="create" ref={blogFormRef} >
         <BlogForm createBlog={handleCreateBlog} />
       </Toggelable>
       {sortedBlogs.map(blog =>
-        <Blog 
+        <Blog
           key={blog.id}
           blog={blog}
           likeBlog={handleLikeBlog}

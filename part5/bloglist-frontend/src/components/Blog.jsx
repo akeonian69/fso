@@ -29,10 +29,10 @@ const Blog = ({ blog, likeBlog, username, removeBlog }) => {
   return <div style={blogStyle}>
     {blog.title} {blog.author}
     <button onClick={() => setVisible(!visible)}>
-      {visible ? "hide" : "view"}
+      {visible ? 'hide' : 'view'}
     </button>
     {visible && details()}
-  </div>  
+  </div>
 }
 
 export default Blog
