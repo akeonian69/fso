@@ -24,11 +24,11 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 Cypress.Commands.add('createUser', user => {
-  cy.request('POST', 'http://localhost:3003/api/users/', user)
+  cy.request('POST', `${Cypress.env('BACKEND')}/users/`, user)
   cy.visit('')
 })
 Cypress.Commands.add('login', ({ username, password }) => {
-  cy.request('POST', 'http://localhost:3003/api/login', {
+  cy.request('POST', `${Cypress.env('BACKEND')}/login`, {
     username, password
   }).then(({ body }) => {
     localStorage.setItem('loggedBloglistAppUser', JSON.stringify(body))
@@ -37,7 +37,7 @@ Cypress.Commands.add('login', ({ username, password }) => {
 })
 Cypress.Commands.add('createBlog', blog => {
   cy.request({
-    url: 'http://localhost:3003/api/blogs',
+    url: `${Cypress.env('BACKEND')}/blogs`,
     method: 'POST',
     body: blog,
     headers: {

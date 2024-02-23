@@ -1,6 +1,6 @@
 describe('Blog app', function() {
   beforeEach(function() {
-    cy.request('POST', 'http://localhost:3003/api/testing/reset')
+    cy.request('POST', `${Cypress.env('BACKEND')}/testing/reset`)
     const user = {
       name: 'John Hardy',
       username: 'johnhardy',
@@ -65,14 +65,16 @@ describe('Blog app', function() {
         cy.createBlog(blog)
       })
       it('User can like a blog', function() {
-        cy.contains('view').click()
+        cy.contains('A new blog to test cypress').as('blogItem')
+        cy.get('@blogItem').contains('view').click()
         cy.get('#like-button').click()
 
-        cy.contains('likes 1')
+        cy.get('@blogItem').contains('likes 1')
       })
       it('Owner of the blog can remove it', function() {
-        cy.contains('view').click()
-        cy.contains('remove').click()
+        cy.contains('A new blog to test cypress').as('blogItem')
+        cy.get('@blogItem').contains('view').click()
+        cy.get('@blogItem').contains('remove').click()
 
         cy.contains('A new blog to test cypress').should('not.exist')
       })
@@ -84,10 +86,12 @@ describe('Blog app', function() {
         }
         cy.createUser(user)
         cy.login(user)
-        cy.contains('view').click()
-        cy.contains('remove').should('not.exist')
+
+        cy.contains('A new blog to test cypress').as('blogItem')
+        cy.get('@blogItem').contains('view').click()
+        cy.get('@blogItem').contains('remove').should('not.exist')
       })
-      it.only('Blogs are ordered by likes', function() {
+      it('Blogs are ordered by likes', function() {
         const blog = {
           title: 'Test Blog',
           author: 'Test Author',
