@@ -21,6 +21,7 @@ const BlogForm = props => {
       <div>
         title:
         <input
+          id='blog-title'
           type="text"
           value={title}
           name="title"
@@ -30,6 +31,7 @@ const BlogForm = props => {
       <div>
         author:
         <input
+          id='blog-author'
           type="text"
           value={author}
           name="author"
@@ -39,13 +41,14 @@ const BlogForm = props => {
       <div>
         url:
         <input
+          id='blog-url'
           type="text"
           value={url}
           name="url"
           placeholder='write blog url here'
           onChange={event => setUrl(event.target.value)} />
       </div>
-      <button type="submit">create</button>
+      <button id='create-blog-button' type="submit">create</button>
     </form>
   </>
 }
