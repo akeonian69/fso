@@ -19,11 +19,9 @@ const asObject = (anecdote) => {
   }
 }
 
-const initialState = anecdotesAtStart.map(asObject)
-
 const anecdoteSlice = createSlice({
   name: 'anecdote',
-  initialState,
+  initialState: [],
   reducers: {
     voteAnecdote(state, action) {
       console.log('state now: ', state)
@@ -38,10 +36,13 @@ const anecdoteSlice = createSlice({
     createAnecdote(state, action) {
       console.log('state now: ', state)
       console.log('action', action)
-      return state.concat(asObject(action.payload))
+      return state.concat(action.payload)
+    },
+    setAnecdotes(state, action) {
+      return action.payload
     }
   }
 })
 
-export const { voteAnecdote, createAnecdote } = anecdoteSlice.actions
+export const { voteAnecdote, createAnecdote, setAnecdotes } = anecdoteSlice.actions
 export default anecdoteSlice.reducer
