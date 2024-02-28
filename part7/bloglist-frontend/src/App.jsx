@@ -7,13 +7,117 @@ import loginService from './services/login'
 import { useDispatch, useSelector } from 'react-redux'
 import { showErrorNotification } from './reducers/errorNotificationReducer'
 import { setUser, removeUser } from './reducers/userReducer'
+import usersService from './services/users'
+import { Routes, Route, Link, useMatch } from 'react-router-dom'
 import {
   initializeBlogs,
   createBlog,
   likeBlog,
   removeBlog,
+  postComment,
 } from './reducers/blogReducer'
 
+const NavigationMenu = (props) => {
+  const { user, onLogout } = props
+  if (!user) {
+    return null
+  }
+  const padding = {
+    padding: 5,
+  }
+  return (
+    <div>
+      <p>
+        <Link style={padding} to="/">
+          blogs
+        </Link>
+        <Link style={padding} to="/users">
+          users
+        </Link>
+        {user.name} logged in <button onClick={onLogout}>logout</button>
+      </p>
+    </div>
+  )
+}
+
+const BlogPost = (props) => {
+  const { blog } = props
+  const dispatch = useDispatch()
+  if (!blog) {
+    return null
+  }
+  const handleComment = async (event) => {
+    const comment = {
+      text: event.target.comment.value,
+    }
+    dispatch(postComment(blog, comment))
+  }
+  return (
+    <div>
+      <h2>{blog.title}</h2>
+      <Link to={blog.url}>{blog.url}</Link>
+      <p>
+        {blog.likes} likes
+        <button onClick={() => dispatch(likeBlog(blog))}>like</button>
+      </p>
+      <p>added by {blog.author}</p>
+      <p>
+        <strong>comments</strong>
+      </p>
+      <form onSubmit={handleComment}>
+        <input name="comment" type="text" />
+        <button>add comment</button>
+      </form>
+      <ul>
+        {blog.comments &&
+          blog.comments.map((c) => <li key={c.id}>{c.text}</li>)}
+      </ul>
+    </div>
+  )
+}
+const User = (props) => {
+  const { user } = props
+  if (!user) {
+    return null
+  }
+  return (
+    <div>
+      <h2>{user.name}</h2>
+      <h3>added blogs</h3>
+      <ul>
+        {user.blogs.map((b) => (
+          <li key={b.id}>{b.title}</li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+const Users = (props) => {
+  const { users } = props
+  return (
+    <div>
+      <h2>Users</h2>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>blogs created</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((user) => (
+            <tr key={user.id}>
+              <td>
+                <Link to={`/users/${user.id}`}>{user.name}</Link>
+              </td>
+              <td>{user.blogs.length}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
 const Notification = () => {
   const message = useSelector((state) => state.notification)
   const notificationStyle = {
@@ -91,12 +195,23 @@ const App = () => {
   const user = useSelector((state) => state.user)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [users, setUsers] = useState([])
   const dispatch = useDispatch()
+  const userMatch = useMatch('/users/:id')
+  const blogMatch = useMatch('/blogs/:id')
 
   const blogFormRef = useRef()
 
   useEffect(() => {
     dispatch(initializeBlogs())
+  }, [])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await usersService.getAll()
+      setUsers(data)
+    }
+    fetchData()
   }, [])
 
   useEffect(() => {
@@ -177,33 +292,44 @@ const App = () => {
     )
   }
 
-  const sortedBlogs = blogs // blogs.sort((b1, b2) => b2.likes - b1.likes)
+  const matchedUser = userMatch
+    ? users.find((u) => u.id === userMatch.params.id)
+    : null
+  const matchedBlog = blogMatch
+    ? blogs.find((b) => b.id === blogMatch.params.id)
+    : null
+  const sortedBlogs = blogs.slice().sort((b1, b2) => b2.likes - b1.likes)
 
+  const home = () => {
+    return (
+      <>
+        <Toggelable buttonLabel="create" ref={blogFormRef}>
+          <BlogForm createBlog={handleCreateBlog} />
+        </Toggelable>
+        {sortedBlogs.map((blog) => (
+          <Blog
+            key={blog.id}
+            blog={blog}
+            likeBlog={handleLikeBlog}
+            username={user.username}
+            removeBlog={handleRemoveBlog}
+          />
+        ))}
+      </>
+    )
+  }
   return (
     <div>
+      <NavigationMenu user={user} onLogout={handleLogout} />
       <h2>blogs</h2>
       <Notification />
       <ErrorNotification />
-      {user && (
-        <div>
-          <p>
-            {user.name} logged in
-            <button onClick={handleLogout}>logout</button>
-          </p>
-        </div>
-      )}
-      <Toggelable buttonLabel="create" ref={blogFormRef}>
-        <BlogForm createBlog={handleCreateBlog} />
-      </Toggelable>
-      {sortedBlogs.map((blog) => (
-        <Blog
-          key={blog.id}
-          blog={blog}
-          likeBlog={handleLikeBlog}
-          username={user.username}
-          removeBlog={handleRemoveBlog}
-        />
-      ))}
+      <Routes>
+        <Route path="/users/:id" element={<User user={matchedUser} />} />
+        <Route path="/blogs/:id" element={<BlogPost blog={matchedBlog} />} />
+        <Route path="/users" element={<Users users={users} />} />
+        <Route path="/" element={home()} />
+      </Routes>
     </div>
   )
 }

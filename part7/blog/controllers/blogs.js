@@ -5,11 +5,9 @@ const jwt = require('jsonwebtoken')
 
 const getDecodedToken = (request, response, next) => {
   try {
-    const decodedToken = jwt.verify(
-      request.token, 
-      process.env.SECRET,
-      { expiresIn: 60*60 }
-    )
+    const decodedToken = jwt.verify(request.token, process.env.SECRET, {
+      expiresIn: 60 * 60,
+    })
     if (!decodedToken.id) {
       response.status(401).json({ error: 'token invalid' })
       return null
@@ -21,7 +19,7 @@ const getDecodedToken = (request, response, next) => {
 }
 
 blogsRouter.get('/', async (request, response, next) => {
-  const blogs = await Blog.find({}).populate('user')
+  const blogs = await Blog.find({}).populate(['user', 'comments'])
   logger.info(`db blogs: ${blogs.length}`)
   response.json(blogs)
 })
@@ -31,7 +29,7 @@ blogsRouter.post('/', async (request, response, next) => {
   const user = request.user
   if (!user) {
     const error = {
-      error: "Invalid Token"
+      error: 'Invalid Token',
     }
     return response.status(401).json(error)
   }
@@ -39,7 +37,7 @@ blogsRouter.post('/', async (request, response, next) => {
   const item = {
     user: user.id,
     likes: request.body.likes || 0,
-    ...request.body
+    ...request.body,
   }
   if (!item.title || !item.url) {
     return response.status(404).end()
@@ -58,7 +56,7 @@ blogsRouter.delete('/:id', async (request, response, next) => {
   const user = request.user
   if (!user) {
     const error = {
-      error: "Invalid Token"
+      error: 'Invalid Token',
     }
     return response.status(401).json(error)
   }
@@ -68,15 +66,15 @@ blogsRouter.delete('/:id', async (request, response, next) => {
   const blog = await Blog.findById(id)
   if (blog.user.toString() !== user._id.toString()) {
     const error = {
-      error: "Unauthorized user"
+      error: 'Unauthorized user',
     }
     return response.status(401).json(error)
   }
 
-  user.blogs = user.blogs.filter(b => b.toString() !== id)
+  user.blogs = user.blogs.filter((b) => b.toString() !== id)
   await Blog.findByIdAndDelete(id)
   user.save()
-  response.status(204).end() 
+  response.status(204).end()
 })
 
 blogsRouter.put('/:id', async (request, response) => {
@@ -85,7 +83,7 @@ blogsRouter.put('/:id', async (request, response) => {
   const user = request.user
   if (!user) {
     const error = {
-      error: "Invalid Token"
+      error: 'Invalid Token',
     }
     return response.status(401).json(error)
   }
@@ -95,7 +93,7 @@ blogsRouter.put('/:id', async (request, response) => {
   const blog = await Blog.findById(id)
   if (blog.user.toString() !== user._id.toString()) {
     const error = {
-      error: "Unauthorized user"
+      error: 'Unauthorized user',
     }
     return response.status(401).json(error)
   }

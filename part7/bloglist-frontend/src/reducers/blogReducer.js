@@ -1,4 +1,5 @@
 import blogService from '../services/blogs'
+import commentService from '../services/comments'
 import { createSlice } from '@reduxjs/toolkit'
 import { showNotification } from './notificationReducer'
 import { showErrorNotification } from './errorNotificationReducer'
@@ -25,10 +26,20 @@ const blogSlice = createSlice({
     deleteBlog(state, action) {
       return state.filter((blog) => blog.id !== action.payload.id)
     },
+    appendComment(state, action) {
+      const c = action.payload
+      return state.map((b) => {
+        if (b.id === c.blogId) {
+          b.comments = b.comments.concat(c)
+          return b
+        }
+        return b
+      })
+    },
   },
 })
 
-export const { setBlogs, appendBlog, updateBlog, deleteBlog } =
+export const { setBlogs, appendBlog, updateBlog, deleteBlog, appendComment } =
   blogSlice.actions
 
 export const initializeBlogs = () => {
@@ -93,6 +104,18 @@ export const removeBlog = (blog) => {
       } else {
         dispatch(showErrorNotification(exception.message))
       }
+    }
+  }
+}
+
+export const postComment = (blog, comment) => {
+  return async (dispatch) => {
+    try {
+      const createdComment = await commentService.create(blog.id, comment)
+      dispatch(appendComment(createdComment))
+    } catch (exception) {
+      console.error('postComment error', exception)
+      dispatch(showErrorNotification(exception.message))
     }
   }
 }
