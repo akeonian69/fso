@@ -5,7 +5,7 @@ import BlogForm from './components/BlogForm'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
-const Notification = props => {
+const Notification = (props) => {
   const { message } = props
   const notificationStyle = {
     color: 'green',
@@ -14,17 +14,15 @@ const Notification = props => {
     borderStyle: 'solid',
     borderRadius: 5,
     padding: 10,
-    marginBottom: 10
+    marginBottom: 10,
   }
   if (message) {
-    return <div style={notificationStyle}>
-      {message}
-    </div>
+    return <div style={notificationStyle}>{message}</div>
   }
   return null
 }
 
-const ErrorNotification = props => {
+const ErrorNotification = (props) => {
   const { error } = props
   const notificationStyle = {
     color: 'red',
@@ -33,43 +31,50 @@ const ErrorNotification = props => {
     borderStyle: 'solid',
     borderRadius: 5,
     padding: 10,
-    marginBottom: 10
+    marginBottom: 10,
   }
   if (error) {
-    return <div className='error' style={notificationStyle}>
-      {error}
-    </div>
+    return (
+      <div className="error" style={notificationStyle}>
+        {error}
+      </div>
+    )
   }
   return null
 }
 
-const LoginForm = props => {
-  const { username, onUsernameChange, password, onPasswordChange, onSubmit } = props
-  return <div>
-    <form onSubmit={onSubmit}>
-      <div>
-        username
-        <input
-          id='username'
-          type="text"
-          value={username}
-          name="Username"
-          onChange={onUsernameChange} />
-      </div>
-      <div>
-        password
-        <input
-          id='password'
-          type="password"
-          value={password}
-          name="Password"
-          onChange={onPasswordChange} />
-      </div>
-      <button id='login-button' type="submit">
-        login
-      </button>
-    </form>
-  </div>
+const LoginForm = (props) => {
+  const { username, onUsernameChange, password, onPasswordChange, onSubmit } =
+    props
+  return (
+    <div>
+      <form onSubmit={onSubmit}>
+        <div>
+          username
+          <input
+            id="username"
+            type="text"
+            value={username}
+            name="Username"
+            onChange={onUsernameChange}
+          />
+        </div>
+        <div>
+          password
+          <input
+            id="password"
+            type="password"
+            value={password}
+            name="Password"
+            onChange={onPasswordChange}
+          />
+        </div>
+        <button id="login-button" type="submit">
+          login
+        </button>
+      </form>
+    </div>
+  )
 }
 
 const App = () => {
@@ -83,7 +88,7 @@ const App = () => {
   const blogFormRef = useRef()
 
   useEffect(() => {
-    const fetchData  = async () => {
+    const fetchData = async () => {
       const blogs = await blogService.getAll()
       setBlogs(blogs)
     }
@@ -99,11 +104,11 @@ const App = () => {
     }
   }, [])
 
-  const showMessage = msg => {
+  const showMessage = (msg) => {
     setMessage(msg)
     setTimeout(() => setMessage(null), 3000)
   }
-  const showErrorMessage = errorMsg => {
+  const showErrorMessage = (errorMsg) => {
     setErrorMessage(errorMsg)
     setTimeout(() => setErrorMessage(null), 4000)
   }
@@ -117,14 +122,15 @@ const App = () => {
       console.log('user', loggedUser)
 
       window.localStorage.setItem(
-        'loggedBloglistAppUser', JSON.stringify(loggedUser)
+        'loggedBloglistAppUser',
+        JSON.stringify(loggedUser)
       )
 
       blogService.setToken(loggedUser.token)
       setUser(loggedUser)
       setUsername('')
       setPassword('')
-    } catch(exception) {
+    } catch (exception) {
       if (exception.response && exception.response.data) {
         showErrorMessage(exception.response.data.error)
       } else {
@@ -137,7 +143,7 @@ const App = () => {
     window.localStorage.removeItem('loggedBloglistAppUser')
     setUser(null)
   }
-  const handleCreateBlog = async blog => {
+  const handleCreateBlog = async (blog) => {
     try {
       blogFormRef.current.toggleVisibility()
       const createdBlog = await blogService.create(blog)
@@ -149,16 +155,16 @@ const App = () => {
       showErrorMessage(exception.message)
     }
   }
-  const handleLikeBlog = async blog => {
+  const handleLikeBlog = async (blog) => {
     const newBlog = {
       user: blog.user.id,
       likes: blog.likes + 1,
       author: blog.author,
       title: blog.title,
-      url: blog.url
+      url: blog.url,
     }
     const updatedBlog = await blogService.update(blog.id, newBlog)
-    const newBlogs = blogs.map(b => {
+    const newBlogs = blogs.map((b) => {
       if (b.id === blog.id) {
         return updatedBlog
       }
@@ -166,14 +172,14 @@ const App = () => {
     })
     setBlogs(newBlogs)
   }
-  const handleRemoveBlog = async blog => {
+  const handleRemoveBlog = async (blog) => {
     const confirmMsg = `Remove blog ${blog.title}`
     if (window.confirm(confirmMsg)) {
       try {
         console.log('deleting blog', blog)
         const response = await blogService.remove(blog.id)
         console.log('delete response', response)
-        const newBlogs = blogs.filter(b => b.id !== blog.id)
+        const newBlogs = blogs.filter((b) => b.id !== blog.id)
         setBlogs(newBlogs)
         showMessage(`Deleted ${blog.title}`)
       } catch (exception) {
@@ -187,26 +193,28 @@ const App = () => {
     }
   }
 
-  const handleUsernameChange = event => {
+  const handleUsernameChange = (event) => {
     setUsername(event.target.value)
   }
-  const handlePasswordChange = event => {
+  const handlePasswordChange = (event) => {
     setPassword(event.target.value)
   }
 
   if (user === null) {
-    return <div>
-      <h2>log in to application</h2>
-      <Notification message={message} />
-      <ErrorNotification error={errorMessage} />
-      <LoginForm
-        username={username}
-        onUsernameChange={handleUsernameChange}
-        password={password}
-        onPasswordChange={handlePasswordChange}
-        onSubmit={handleLogin} />
-
-    </div>
+    return (
+      <div>
+        <h2>log in to application</h2>
+        <Notification message={message} />
+        <ErrorNotification error={errorMessage} />
+        <LoginForm
+          username={username}
+          onUsernameChange={handleUsernameChange}
+          password={password}
+          onPasswordChange={handlePasswordChange}
+          onSubmit={handleLogin}
+        />
+      </div>
+    )
   }
 
   const sortedBlogs = blogs.sort((b1, b2) => b2.likes - b1.likes)
@@ -216,22 +224,26 @@ const App = () => {
       <h2>blogs</h2>
       <Notification message={message} />
       <ErrorNotification error={errorMessage} />
-      {user && <div>
-        <p>{user.name} logged in
-          <button onClick={handleLogout}>logout</button>
-        </p>
-      </div>}
-      <Toggelable buttonLabel="create" ref={blogFormRef} >
+      {user && (
+        <div>
+          <p>
+            {user.name} logged in
+            <button onClick={handleLogout}>logout</button>
+          </p>
+        </div>
+      )}
+      <Toggelable buttonLabel="create" ref={blogFormRef}>
         <BlogForm createBlog={handleCreateBlog} />
       </Toggelable>
-      {sortedBlogs.map(blog =>
+      {sortedBlogs.map((blog) => (
         <Blog
           key={blog.id}
           blog={blog}
           likeBlog={handleLikeBlog}
           username={user.username}
-          removeBlog={handleRemoveBlog}/>
-      )}
+          removeBlog={handleRemoveBlog}
+        />
+      ))}
     </div>
   )
 }
