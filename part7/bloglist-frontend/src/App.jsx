@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import Users from './components/Users'
 import Blog from './components/Blog'
 import Toggelable from './components/Togglable'
 import BlogForm from './components/BlogForm'
@@ -16,6 +17,19 @@ import {
   removeBlog,
   postComment,
 } from './reducers/blogReducer'
+import {
+  Container,
+  Table,
+  TableBody,
+  TableContainer,
+  Paper,
+  Alert,
+  TextField,
+  Button,
+  AppBar,
+  Toolbar,
+  IconButton,
+} from '@mui/material'
 
 const NavigationMenu = (props) => {
   const { user, onLogout } = props
@@ -26,17 +40,27 @@ const NavigationMenu = (props) => {
     padding: 5,
   }
   return (
-    <div>
-      <p>
-        <Link style={padding} to="/">
+    <AppBar position="static">
+      <Toolbar>
+        <IconButton edge="start" color="inherit" aria-label="menu"></IconButton>
+        <Button color="inherit" component={Link} to="/">
           blogs
-        </Link>
-        <Link style={padding} to="/users">
+        </Button>
+        <Button color="inherit" component={Link} to="/users">
           users
-        </Link>
-        {user.name} logged in <button onClick={onLogout}>logout</button>
-      </p>
-    </div>
+        </Button>
+        {user ? (
+          <em>{user.name} logged in</em>
+        ) : (
+          <Button color="inherit" component={Link} to="/login">
+            login
+          </Button>
+        )}
+        <Button color="inherit" onClick={onLogout}>
+          logout
+        </Button>
+      </Toolbar>
+    </AppBar>
   )
 }
 
@@ -92,47 +116,16 @@ const User = (props) => {
     </div>
   )
 }
-const Users = (props) => {
-  const { users } = props
-  return (
-    <div>
-      <h2>Users</h2>
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>blogs created</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td>
-                <Link to={`/users/${user.id}`}>{user.name}</Link>
-              </td>
-              <td>{user.blogs.length}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
 const Notification = () => {
   const message = useSelector((state) => state.notification)
-  const notificationStyle = {
-    color: 'green',
-    background: 'lightgrey',
-    fontSize: 20,
-    borderStyle: 'solid',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
+  if (!message) {
+    return null
   }
-  if (message) {
-    return <div style={notificationStyle}>{message}</div>
-  }
-  return null
+  return (
+    <div>
+      <Alert severity="success">{message}</Alert>
+    </div>
+  )
 }
 
 const ErrorNotification = () => {
@@ -146,45 +139,51 @@ const ErrorNotification = () => {
     padding: 10,
     marginBottom: 10,
   }
-  if (error) {
-    return (
-      <div className="error" style={notificationStyle}>
-        {error}
-      </div>
-    )
+  if (!error) {
+    return null
   }
-  return null
+  return (
+    <div className="error" style={notificationStyle}>
+      <Alert severity="error">{error}</Alert>
+    </div>
+  )
 }
 
 const LoginForm = (props) => {
   const { username, onUsernameChange, password, onPasswordChange, onSubmit } =
     props
+
+  const margin = {
+    margin: 10,
+  }
   return (
     <div>
       <form onSubmit={onSubmit}>
-        <div>
-          username
-          <input
+        <div style={margin}>
+          <TextField
             id="username"
             type="text"
             value={username}
             name="Username"
+            label="Username"
             onChange={onUsernameChange}
           />
         </div>
-        <div>
-          password
-          <input
+        <div style={margin}>
+          <TextField
             id="password"
             type="password"
             value={password}
             name="Password"
+            label="Password"
             onChange={onPasswordChange}
           />
         </div>
-        <button id="login-button" type="submit">
-          login
-        </button>
+        <div style={margin}>
+          <Button variant="contained" id="login-button" type="submit">
+            login
+          </Button>
+        </div>
       </form>
     </div>
   )
@@ -258,16 +257,6 @@ const App = () => {
     blogFormRef.current.toggleVisibility()
   }
 
-  const handleLikeBlog = async (blog) => {
-    dispatch(likeBlog(blog))
-  }
-  const handleRemoveBlog = async (blog) => {
-    const confirmMsg = `Remove blog ${blog.title}`
-    if (window.confirm(confirmMsg)) {
-      dispatch(removeBlog(blog))
-    }
-  }
-
   const handleUsernameChange = (event) => {
     setUsername(event.target.value)
   }
@@ -277,8 +266,8 @@ const App = () => {
 
   if (user === null) {
     return (
-      <div>
-        <h2>log in to application</h2>
+      <Container>
+        <h2>Log in to application</h2>
         <Notification />
         <ErrorNotification />
         <LoginForm
@@ -288,7 +277,7 @@ const App = () => {
           onPasswordChange={handlePasswordChange}
           onSubmit={handleLogin}
         />
-      </div>
+      </Container>
     )
   }
 
@@ -306,22 +295,22 @@ const App = () => {
         <Toggelable buttonLabel="create" ref={blogFormRef}>
           <BlogForm createBlog={handleCreateBlog} />
         </Toggelable>
-        {sortedBlogs.map((blog) => (
-          <Blog
-            key={blog.id}
-            blog={blog}
-            likeBlog={handleLikeBlog}
-            username={user.username}
-            removeBlog={handleRemoveBlog}
-          />
-        ))}
+        <TableContainer component={Paper}>
+          <Table>
+            <TableBody>
+              {sortedBlogs.map((blog) => (
+                <Blog key={blog.id} blog={blog} username={user.username} />
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </>
     )
   }
   return (
-    <div>
+    <Container>
       <NavigationMenu user={user} onLogout={handleLogout} />
-      <h2>blogs</h2>
+      <h1>Blogs</h1>
       <Notification />
       <ErrorNotification />
       <Routes>
@@ -330,7 +319,7 @@ const App = () => {
         <Route path="/users" element={<Users users={users} />} />
         <Route path="/" element={home()} />
       </Routes>
-    </div>
+    </Container>
   )
 }
 
